@@ -267,7 +267,7 @@ app.delete("/api/goals/:id", auth, async (req, res) => {
   res.status(204).end();
 });
 
-app.get("*", (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
