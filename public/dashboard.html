@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard · StudentOnTrack</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="dashboard">
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="dashboard.html">StudentOnTrack</a>
+    <nav class="nav">
+      <a data-nav="dashboard" href="dashboard.html">Dashboard</a>
+      <a data-nav="assignments" href="assignments.html">Assignments</a>
+      <a data-nav="attendance" href="attendance.html">Attendance</a>
+      <a data-nav="goals" href="goals.html">Goals</a>
+    </nav>
+    <div class="nav-actions"><span class="account-line" id="accountEmail"></span><button class="btn btn-small" id="signout">Sign out</button></div>
+  </div>
+</header>
+<main id="dashboard"><div class="container">
+<div class="page-head"><div><div class="eyebrow">Overview</div><h1>Your workspace</h1><p class="subtle">A quick view of the work you have chosen to track.</p></div></div>
+<section class="grid stats">
+<div class="card stat"><div class="stat-label">Assignments</div><div class="stat-value" id="aTotal">0</div></div>
+<div class="card stat"><div class="stat-label">Completed</div><div class="stat-value" id="aDone">0</div></div>
+<div class="card stat"><div class="stat-label">Due soon</div><div class="stat-value" id="aDue">0</div></div>
+<div class="card stat"><div class="stat-label">Overdue</div><div class="stat-value" id="aOver">0</div></div>
+</section>
+<section class="grid content-grid">
+<article class="card"><div class="card-head"><div><h2>Assignment accountability</h2><div class="subtle" id="accountabilityText">0% of your assignments completed</div></div><a class="btn btn-small" href="assignments.html">Manage</a></div><div class="card-body"><div class="progress"><span id="accountabilityBar" style="width:0%"></span></div><div class="grid stats" style="grid-template-columns:1fr 1fr;margin-top:18px"><div><div class="stat-label">Attendance average</div><div class="stat-value" id="attAvg">0%</div></div><div><div class="stat-label">Attendance subjects at risk</div><div class="stat-value" id="attRisk">0</div></div></div></div></article>
+<aside class="card"><div class="card-head"><div><h2>Goals</h2><div class="subtle">Your progress</div></div><a class="btn btn-small" href="goals.html">Open</a></div><div class="card-body"><div class="kpi-line"><span class="subtle">Active goals</span><strong id="goalTotal">0</strong></div><div class="kpi-line" style="margin-top:10px"><span class="subtle">Completed</span><strong id="goalDone">0</strong></div></div></aside>
+</section>
+</div></main>
+<script src="js/app.js" defer></script>
+</body>
+</html>

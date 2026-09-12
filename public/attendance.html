@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Attendance · StudentOnTrack</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="attendance">
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="dashboard.html">StudentOnTrack</a>
+    <nav class="nav">
+      <a data-nav="dashboard" href="dashboard.html">Dashboard</a>
+      <a data-nav="assignments" href="assignments.html">Assignments</a>
+      <a data-nav="attendance" href="attendance.html">Attendance</a>
+      <a data-nav="goals" href="goals.html">Goals</a>
+    </nav>
+    <div class="nav-actions"><span class="account-line" id="accountEmail"></span><button class="btn btn-small" id="signout">Sign out</button></div>
+  </div>
+</header>
+<main><div class="container">
+<div class="page-head"><div><div class="eyebrow">Consistency</div><h1>Attendance</h1><p class="subtle">Record each class and keep an eye on subjects that need attention.</p></div></div>
+<section class="grid stats">
+<div class="card stat"><div class="stat-label">Subjects</div><div class="stat-value" id="subjects">0</div></div>
+<div class="card stat"><div class="stat-label">Average attendance</div><div class="stat-value" id="average">0%</div></div>
+<div class="card stat"><div class="stat-label">At risk</div><div class="stat-value" id="risk">0</div></div>
+<div class="card stat"><div class="stat-label">Target</div><div class="stat-value">75%</div></div>
+</section>
+<section class="card" style="margin-top:18px"><div class="card-head"><div><h2>Add subject</h2><div class="subtle">You can enter existing classes or start from zero.</div></div></div><div class="card-body"><form id="attendanceForm" class="form-grid" style="grid-template-columns:2fr 1fr 1fr auto"><div class="field"><label for="attSubject">Subject</label><input id="attSubject" required placeholder="e.g. Data Structures"></div><div class="field"><label for="attended">Attended</label><input id="attended" type="number" min="0" value="0"></div><div class="field"><label for="total">Total classes</label><input id="total" type="number" min="0" value="0"></div><button class="btn btn-primary" type="submit">Add</button></form></div></section>
+<section class="card" style="margin-top:18px"><div class="card-head"><div><h2>Subjects</h2></div></div><div class="card-body"><div class="list" id="attendanceList"></div></div></section>
+</div></main>
+<script src="js/app.js" defer></script>
+</body>
+</html>

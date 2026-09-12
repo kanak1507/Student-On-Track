@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign in · StudentOnTrack</title><link rel="stylesheet" href="css/styles.css"></head>
+<body data-page="signin">
+<main class="auth-page"><section class="auth-card">
+<div class="auth-brand">StudentOnTrack</div>
+<div class="auth-tabs"><button class="auth-tab active" id="signTab" type="button">Sign in</button><button class="auth-tab" id="registerTab" type="button">Create account</button></div>
+<form id="signForm" class="auth-form">
+<div><h1>Welcome back</h1><p class="subtle">Sign in to access your private workspace.</p></div>
+<div class="field"><label for="signEmail">Email</label><input id="signEmail" type="email" required autocomplete="username" placeholder="you@example.com"></div>
+<div class="field"><label for="signPassword">Password</label><input id="signPassword" type="password" required autocomplete="current-password" placeholder="Your password"></div>
+<button class="btn btn-primary" type="submit">Sign in</button><div id="signError" class="error" aria-live="polite"></div>
+</form>
+<form id="registerForm" class="auth-form" hidden>
+<div><h1>Create account</h1><p class="subtle">No sample student data is created. Start with your own account.</p></div>
+<div class="field"><label for="regEmail">Email</label><input id="regEmail" type="email" required autocomplete="username" placeholder="you@example.com"></div>
+<div class="field"><label for="regPassword">Password</label><input id="regPassword" type="password" minlength="8" required autocomplete="new-password" placeholder="At least 8 characters"></div>
+<div class="field"><label for="regConfirm">Confirm password</label><input id="regConfirm" type="password" minlength="8" required autocomplete="new-password" placeholder="Repeat your password"></div>
+<button class="btn btn-primary" type="submit">Create account</button><div id="registerError" class="error" aria-live="polite"></div>
+</form>
+<p class="subtle" style="margin:18px 0 0;text-align:center"><a href="index.html">Back to home</a></p>
+</section></main>
+<script src="js/app.js" defer></script></body></html>

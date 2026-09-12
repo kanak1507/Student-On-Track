@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Assignments · StudentOnTrack</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="assignments">
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="dashboard.html">StudentOnTrack</a>
+    <nav class="nav">
+      <a data-nav="dashboard" href="dashboard.html">Dashboard</a>
+      <a data-nav="assignments" href="assignments.html">Assignments</a>
+      <a data-nav="attendance" href="attendance.html">Attendance</a>
+      <a data-nav="goals" href="goals.html">Goals</a>
+    </nav>
+    <div class="nav-actions"><span class="account-line" id="accountEmail"></span><button class="btn btn-small" id="signout">Sign out</button></div>
+  </div>
+</header>
+<main><div class="container">
+<div class="page-head"><div><div class="eyebrow">Accountability</div><h1>Assignments</h1><p class="subtle">Turn deadlines into a visible commitment. Mark work complete when it is actually done.</p></div></div>
+<section class="grid stats">
+<div class="card stat"><div class="stat-label">Total</div><div class="stat-value" id="aTotal">0</div></div>
+<div class="card stat"><div class="stat-label">Completed</div><div class="stat-value" id="aDone">0</div></div>
+<div class="card stat"><div class="stat-label">Due within 7 days</div><div class="stat-value" id="aDue">0</div></div>
+<div class="card stat"><div class="stat-label">Overdue</div><div class="stat-value" id="aOver">0</div></div>
+</section>
+<section class="card" style="margin-top:18px"><div class="card-head"><div><h2>Add assignment</h2><div class="subtle">Only your data is stored.</div></div></div><div class="card-body">
+<form id="assignmentForm" class="form-grid"><div class="field"><label for="title">Assignment</label><input id="title" required placeholder="e.g. Database lab report"></div><div class="field"><label for="subject">Subject</label><input id="subject" placeholder="Optional"></div><div class="field"><label for="due">Due date</label><input id="due" type="date"></div><button class="btn btn-primary" type="submit">Add</button></form>
+</div></section>
+<section class="card" style="margin-top:18px"><div class="card-head"><div><h2>Accountability list</h2><div class="subtle">Completed work stays visible so your progress is measurable.</div></div></div><div class="card-body" id="assignmentList"></div></section>
+</div></main>
+<script src="js/app.js" defer></script>
+</body>
+</html>

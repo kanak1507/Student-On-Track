@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Goals · StudentOnTrack</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="goals">
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="dashboard.html">StudentOnTrack</a>
+    <nav class="nav">
+      <a data-nav="dashboard" href="dashboard.html">Dashboard</a>
+      <a data-nav="assignments" href="assignments.html">Assignments</a>
+      <a data-nav="attendance" href="attendance.html">Attendance</a>
+      <a data-nav="goals" href="goals.html">Goals</a>
+    </nav>
+    <div class="nav-actions"><span class="account-line" id="accountEmail"></span><button class="btn btn-small" id="signout">Sign out</button></div>
+  </div>
+</header>
+<main><div class="container">
+<div class="page-head"><div><div class="eyebrow">Progress</div><h1>Goals</h1><p class="subtle">Set a measurable target, update it, and finish what you start.</p></div></div>
+<section class="grid stats">
+<div class="card stat"><div class="stat-label">Active goals</div><div class="stat-value" id="goalCount">0</div></div>
+<div class="card stat"><div class="stat-label">Completed</div><div class="stat-value" id="goalDone">0</div></div>
+<div class="card stat"><div class="stat-label">Progress tracking</div><div class="stat-value">On</div></div>
+<div class="card stat"><div class="stat-label">Data source</div><div class="stat-value" style="font-size:18px">PostgreSQL</div></div>
+</section>
+<section class="card" style="margin-top:18px"><div class="card-head"><div><h2>Add goal</h2><div class="subtle">Examples: complete 20 problems, study 10 hours, submit 5 projects.</div></div></div><div class="card-body">
+<form id="goalForm" class="form-grid"><div class="field"><label for="goalTitle">Goal</label><input id="goalTitle" required placeholder="What do you want to achieve?"></div><div class="field"><label for="goalCategory">Category</label><input id="goalCategory" placeholder="Academic, personal..."></div><div class="field"><label for="goalUnit">Unit</label><input id="goalUnit" placeholder="hours, problems..."></div><div class="field"><label for="goalTarget">Target</label><input id="goalTarget" type="number" min="1" required></div><div class="field"><label for="goalCurrent">Current</label><input id="goalCurrent" type="number" min="0" value="0"></div><div class="field"><label for="goalDeadline">Deadline</label><input id="goalDeadline" type="date"></div><button class="btn btn-primary" type="submit">Add goal</button></form>
+</div></section>
+<section class="card" style="margin-top:18px"><div class="card-head"><div><h2>Your goals</h2></div></div><div class="card-body"><div class="list" id="goalList"></div></div></section>
+</div></main>
+<script src="js/app.js" defer></script>
+</body>
+</html>
