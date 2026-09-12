@@ -59,60 +59,67 @@
           "'": "&#039;",
         })[c],
     );
-  function date(value) {
-    if (!value) return "—";
+function date(value) {
+  if (!value) return "—";
 
-    const raw = String(value);
+  const raw = String(value);
 
-    // PostgreSQL DATE normally comes back as YYYY-MM-DD.
-    // Take only the calendar-date portion.
-    const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  // Plain PostgreSQL date: YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    const [year, month, day] = raw.split("-").map(Number);
 
-    if (!match) return "Invalid date";
+    const months = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
 
-    const year = Number(match[1]);
-    const month = Number(match[2]);
-    const day = Number(match[3]);
-
-    const parsed = new Date(year, month - 1, day);
-
-    if (Number.isNaN(parsed.getTime())) {
-      return "Invalid date";
-    }
-
-    return parsed.toLocaleDateString(undefined, {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+    return `${months[month - 1]} ${day}, ${year}`;
   }
 
+  // PostgreSQL DATE serialized by Node as an ISO timestamp.
+  // Convert it back to the user's local calendar date.
+  const parsed = new Date(raw);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return "Invalid date";
+  }
+
+  return parsed.toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
   function days(value) {
-    if (!value) return null;
+  if (!value) return null;
 
-    const raw = String(value);
+  const raw = String(value);
 
-    const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  let target;
 
-    if (!match) return null;
-
-    const year = Number(match[1]);
-    const month = Number(match[2]);
-    const day = Number(match[3]);
-
-    const target = new Date(year, month - 1, day);
+  // Plain YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    const [year, month, day] = raw.split("-").map(Number);
+    target = new Date(year, month - 1, day);
+  } else {
+    // ISO timestamp returned by the API
+    target = new Date(raw);
 
     if (Number.isNaN(target.getTime())) {
       return null;
     }
-
-    const today = new Date();
-
-    today.setHours(0, 0, 0, 0);
-    target.setHours(0, 0, 0, 0);
-
-    return Math.round((target.getTime() - today.getTime()) / 86400000);
   }
+
+  const today = new Date();
+
+  today.setHours(0, 0, 0, 0);
+  target.setHours(0, 0, 0, 0);
+
+  return Math.round(
+    (target.getTime() - today.getTime()) / 86400000
+  );
+}
 
   function guard() {
     const publicPage = page === "home" || page === "signin";
@@ -835,30 +842,64 @@
         })
         .join("");
       $$("[data-plus]").forEach(
-        (b) =>
-          (b.onclick = async () => {
-            const x = items.find(
-              (v) => String(v.id) === String(b.dataset.plus),
-            );
-            const current = Math.min(Number(x.target), Number(x.current) + 1);
-            await saveGoal({
-              ...x,
-              current,
-              completed: current >= Number(x.target),
-            });
-            toast("Progress updated");
+  (b) =>
+    (b.onclick = async () => {
+      try {
+        const x = items.find(
+          (v) => String(v.id) === String(b.dataset.plus),
+        );
+
+        if (!x) return;
+
+        const current = Math.min(
+          Number(x.target),
+          Number(x.current) + 1,
+        );
+
+        await api(`/api/goals/${x.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            current: current,
+            completed: current >= Number(x.target),
           }),
-      );
+        });
+
+        await load();
+
+        toast("Progress updated");
+      } catch (err) {
+        console.error(err);
+        toast(err.message || "Could not update progress.");
+      }
+    }),
+);
       $$("[data-complete]").forEach(
-        (b) =>
-          (b.onclick = async () => {
-            const x = items.find(
-              (v) => String(v.id) === String(b.dataset.complete),
-            );
-            await saveGoal({ ...x, current: x.target, completed: true });
-            toast("Goal completed");
+  (b) =>
+    (b.onclick = async () => {
+      try {
+        const x = items.find(
+          (v) => String(v.id) === String(b.dataset.complete),
+        );
+
+        if (!x) return;
+
+        await api(`/api/goals/${x.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            current: Number(x.target),
+            completed: true,
           }),
-      );
+        });
+
+        await load();
+
+        toast("Goal completed");
+      } catch (err) {
+        console.error(err);
+        toast(err.message || "Could not complete goal.");
+      }
+    }),
+);
       $$("[data-delete]").forEach(
         (b) =>
           (b.onclick = async () => {
@@ -897,21 +938,36 @@
       items = await api("/api/goals");
       render();
     };
-    const saveGoal = async (x) => {
-      await api(`/api/goals/${x.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({
-          title: x.title,
-          category: x.category,
-          unit: x.unit,
-          target: Number(x.target),
-          current: Number(x.current),
-          deadline: x.deadline,
-          completed: Boolean(x.completed),
-        }),
-      });
-      await load();
-    };
+const saveGoal = async (x) => {
+  let deadline = null;
+
+  if (x.deadline) {
+    const parsed = new Date(x.deadline);
+
+    if (!Number.isNaN(parsed.getTime())) {
+      const year = parsed.getFullYear();
+      const month = String(parsed.getMonth() + 1).padStart(2, "0");
+      const day = String(parsed.getDate()).padStart(2, "0");
+
+      deadline = `${year}-${month}-${day}`;
+    }
+  }
+
+  await api(`/api/goals/${x.id}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      title: x.title,
+      category: x.category,
+      unit: x.unit,
+      target: Number(x.target),
+      current: Number(x.current),
+      deadline: deadline,
+      completed: Boolean(x.completed),
+    }),
+  });
+
+  await load();
+};
     form.onsubmit = async (e) => {
       e.preventDefault();
       try {

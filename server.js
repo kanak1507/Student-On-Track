@@ -4,7 +4,8 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { Pool } = require("pg");
+const { Pool, types } = require("pg");
+types.setTypeParser(1082, (value) => value);
 
 dotenv.config();
 
@@ -108,9 +109,20 @@ app.get("/api/summary", auth, async (req, res) => {
 
 app.get("/api/assignments", auth, async (req, res) => {
   const result = await pool.query(
-    "SELECT id,title,subject,due_date,completed,created_at,updated_at FROM assignments WHERE user_id=$1 ORDER BY completed ASC, due_date ASC NULLS LAST, created_at DESC",
+    `SELECT
+       id,
+       title,
+       subject,
+       due_date::text AS due_date,
+       completed,
+       created_at,
+       updated_at
+     FROM assignments
+     WHERE user_id=$1
+     ORDER BY completed ASC, due_date ASC NULLS LAST, created_at DESC`,
     [req.user.id]
   );
+
   res.json(result.rows);
 });
 
@@ -126,24 +138,114 @@ app.post("/api/assignments", auth, async (req, res) => {
   res.status(201).json(result.rows[0]);
 });
 
-app.patch("/api/assignments/:id", auth, async (req, res) => {
-  if (!validId(req.params.id)) return res.status(400).json({ error: "Invalid assignment." });
-  const fields = [];
-  const values = [];
-  let i = 1;
-  if (req.body.title !== undefined) { fields.push(`title=$${i++}`); values.push(String(req.body.title).trim()); }
-  if (req.body.subject !== undefined) { fields.push(`subject=$${i++}`); values.push(String(req.body.subject).trim() || null); }
-  if (req.body.due_date !== undefined) { fields.push(`due_date=$${i++}`); values.push(req.body.due_date || null); }
-  if (req.body.completed !== undefined) { fields.push(`completed=$${i++}`); values.push(Boolean(req.body.completed)); }
-  if (!fields.length) return res.status(400).json({ error: "Nothing to update." });
-  fields.push("updated_at=NOW()");
-  values.push(req.params.id, req.user.id);
-  const result = await pool.query(
-    `UPDATE assignments SET ${fields.join(",")} WHERE id=$${i} AND user_id=$${i+1} RETURNING *`,
-    values
-  );
-  if (!result.rowCount) return res.status(404).json({ error: "Assignment not found." });
-  res.json(result.rows[0]);
+app.patch("/api/goals/:id", auth, async (req, res) => {
+  if (!validId(req.params.id)) {
+    return res.status(400).json({ error: "Invalid goal." });
+  }
+
+  try {
+    // Get the existing goal first
+    const existing = await pool.query(
+      `SELECT id, title, category, unit, target, current, deadline, completed
+       FROM goals
+       WHERE id=$1 AND user_id=$2`,
+      [req.params.id, req.user.id]
+    );
+
+    if (!existing.rowCount) {
+      return res.status(404).json({ error: "Goal not found." });
+    }
+
+    const old = existing.rows[0];
+
+    // Keep existing values when they are not included in the request
+    const title =
+      req.body.title !== undefined
+        ? String(req.body.title).trim()
+        : old.title;
+
+    const category =
+      req.body.category !== undefined
+        ? String(req.body.category).trim() || null
+        : old.category;
+
+    const unit =
+      req.body.unit !== undefined
+        ? String(req.body.unit).trim() || null
+        : old.unit;
+
+    const target =
+      req.body.target !== undefined
+        ? Number(req.body.target)
+        : Number(old.target);
+
+    const current =
+      req.body.current !== undefined
+        ? Number(req.body.current)
+        : Number(old.current);
+
+    const deadline =
+      req.body.deadline !== undefined
+        ? (
+            req.body.deadline
+              ? String(req.body.deadline).slice(0, 10)
+              : null
+          )
+        : old.deadline;
+
+    const completed =
+      req.body.completed !== undefined
+        ? Boolean(req.body.completed)
+        : Boolean(old.completed);
+
+    if (
+      !title ||
+      !Number.isFinite(target) ||
+      target <= 0 ||
+      !Number.isFinite(current) ||
+      current < 0 ||
+      current > target
+    ) {
+      return res.status(400).json({
+        error: "Enter valid goal values."
+      });
+    }
+
+    const finalCompleted = completed || current >= target;
+
+    const result = await pool.query(
+      `UPDATE goals
+       SET title=$1,
+           category=$2,
+           unit=$3,
+           target=$4,
+           current=$5,
+           deadline=$6,
+           completed=$7,
+           updated_at=NOW()
+       WHERE id=$8 AND user_id=$9
+       RETURNING *`,
+      [
+        title,
+        category,
+        unit,
+        target,
+        current,
+        deadline,
+        finalCompleted,
+        req.params.id,
+        req.user.id
+      ]
+    );
+
+    res.json(result.rows[0]);
+
+  } catch (err) {
+    console.error("Goal update error:", err);
+    res.status(500).json({
+      error: "Unable to update goal."
+    });
+  }
 });
 
 app.delete("/api/assignments/:id", auth, async (req, res) => {
@@ -218,9 +320,23 @@ app.delete("/api/attendance/:id", auth, async (req, res) => {
 
 app.get("/api/goals", auth, async (req, res) => {
   const result = await pool.query(
-    "SELECT id,title,category,unit,target,current,deadline,completed,created_at,updated_at FROM goals WHERE user_id=$1 ORDER BY completed ASC, deadline ASC NULLS LAST, created_at DESC",
+    `SELECT
+       id,
+       title,
+       category,
+       unit,
+       target,
+       current,
+       deadline::text AS deadline,
+       completed,
+       created_at,
+       updated_at
+     FROM goals
+     WHERE user_id=$1
+     ORDER BY completed ASC, deadline ASC NULLS LAST, created_at DESC`,
     [req.user.id]
   );
+
   res.json(result.rows);
 });
 
