@@ -12,15 +12,16 @@ const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const JWT_SECRET = process.env.JWT_SECRET;
 
-if (!process.env.DATABASE_URL || !JWT_SECRET) {
+if (!process.env.DB_HOST || !process.env.DB_NAME || !process.env.DB_USER || !process.env.DB_PASSWORD || !JWT_SECRET)  {
   console.warn("Missing DATABASE_URL or JWT_SECRET. Copy .env.example to .env and configure it.");
 }
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("localhost")
-    ? { rejectUnauthorized: false }
-    : false
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT || 5432),
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD
 });
 
 app.use(cors());
