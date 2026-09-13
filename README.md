@@ -1,55 +1,73 @@
-# StudentOnTrack — PostgreSQL Full-Stack Version
+StudentOnTrack
 
-## Stack
-- Frontend: HTML + CSS + Vanilla JavaScript
-- Backend: Node.js + Express
-- Database: PostgreSQL
-- Authentication: bcrypt password hashing + JWT
-- Database driver: `pg`
+StudentOnTrack is a full-stack student productivity and accountability tracker that helps students manage assignments, attendance, and personal goals in one place.
 
-## Setup
+Features
 
-### 1. Install Node.js
-Use a current LTS version of Node.js.
+🔐 User registration and secure login
 
-### 2. Create the PostgreSQL database
-Create an empty database named `studentontrack`.
+📝 Add, edit, complete, and delete assignments
 
-Example with psql:
-```sql
-CREATE DATABASE studentontrack;
-```
+📊 Track attendance and attendance percentage
 
-Then run `db/schema.sql` against that database.
+🎯 Create and track personal goals
 
-### 3. Configure environment variables
-Copy `.env.example` to `.env` and set:
-- `DATABASE_URL`
-- `JWT_SECRET`
+⏰ Identify overdue assignments and goals
 
-Example:
-```env
+📈 Dashboard with a quick progress overview
+
+👤 User-specific data with PostgreSQL
+
+Tech Stack:
+Frontend: HTML, CSS, Vanilla JavaScript
+
+Backend: Node.js, Express.js
+
+Database: PostgreSQL
+
+Authentication: bcrypt + JWT
+
+Database Driver: pg
+
+Installation
+1. Clone the repository
+
+git clone https://github.com/kanak1507/Student-On-Track.git
+cd Student-On-Track
+
+2. Install dependencies
+
+npm install
+
+3. Set up PostgreSQL
+
+Create a database named:
+
+studentontrack
+
+Then run the project's schema.sql file on that database.
+
+4. Configure environment variables
+
+Create a .env file in the project root:
+
 PORT=3000
 DATABASE_URL=postgresql://postgres:your_password@localhost:5432/studentontrack
-JWT_SECRET=use-a-long-random-secret-here
-```
+JWT_SECRET=your_long_random_secret
 
-### 4. Install dependencies
-```bash
-npm install
-```
+5. Start the application
 
-### 5. Start the server
-```bash
 npm start
-```
 
-Open:
-`http://localhost:3000`
+Open http://localhost:3000 in your browser.
 
-## Important
-There is no fake student data. Each account starts empty.
 
-Passwords are hashed with bcrypt and are never stored as plain text.
 
-The JWT is stored in browser localStorage in this starter implementation. For a production deployment, use secure, HttpOnly cookies and HTTPS.
+Security:
+Passwords are securely hashed using bcrypt.
+JWT is used for authentication.
+Database credentials and secrets are stored in environment variables.
+.env is excluded from Git.
+Note: This project currently stores the JWT in browser localStorage. For production, HttpOnly cookies and HTTPS are recommended.
+Author
+Kanak Kumari
