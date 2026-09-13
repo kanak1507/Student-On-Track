@@ -616,15 +616,72 @@ function date(value) {
                   : d <= 7
                     ? '<span class="badge badge-warning">Due soon</span>'
                     : '<span class="badge badge-neutral">Open</span>';
-          return `<tr><td><input class="checkbox" type="checkbox" data-toggle="${x.id}" ${x.completed ? "checked" : ""}></td><td><strong>${esc(x.title)}</strong></td><td>${esc(x.subject) || "—"}</td><td>${date(x.due_date)}</td><td>${badge}</td><td><div class="actions"><button class="btn btn-small" data-edit="${x.id}">Edit</button><button class="btn btn-small btn-danger" data-delete="${x.id}">Delete</button></div></td></tr>`;
+          return `<tr>
+  <td>
+    ${
+      x.completed
+        ? '<span class="badge badge-success">Completed</span>'
+        : `<input class="checkbox" type="checkbox" data-toggle="${x.id}">`
+    }
+  </td>
+
+  <td><strong>${esc(x.title)}</strong></td>
+
+  <td>${esc(x.subject) || "—"}</td>
+
+  <td>${date(x.due_date)}</td>
+
+  <td>${badge}</td>
+
+  <td>
+    <div class="actions">
+      ${
+        x.completed
+          ? ""
+          : `<button class="btn btn-small" data-edit="${x.id}">Edit</button>`
+      }
+
+      <button
+        class="btn btn-small btn-danger"
+        data-delete="${x.id}"
+      >
+        Delete
+      </button>
+    </div>
+  </td>
+</tr>`;
         })
         .join("")}</tbody></table></div>`;
-      $$("[data-toggle]").forEach(
-        (b) =>
-          (b.onchange = async () => {
-            await update(b.dataset.toggle, { completed: b.checked });
-          }),
+$$("[data-toggle]").forEach((b) => {
+  b.addEventListener("change", async () => {
+    const assignmentId = b.dataset.toggle;
+    const completed = b.checked;
+
+    try {
+      await api(`/api/assignments/${assignmentId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          completed: completed,
+        }),
+      });
+
+      await load();
+
+      toast(
+        completed
+          ? "Assignment completed"
+          : "Assignment marked as incomplete",
       );
+    } catch (err) {
+      console.error("Assignment completion error:", err);
+
+      // Put checkbox back if server update failed
+      b.checked = !completed;
+
+      toast(err.message || "Could not update assignment.");
+    }
+  });
+});
       $$("[data-delete]").forEach(
         (b) =>
           (b.onclick = async () => {
@@ -838,41 +895,77 @@ function date(value) {
             100,
             Math.round((Number(x.current) / Number(x.target)) * 100),
           );
-          return `<div class="list-row"><div class="kpi-line"><div><strong>${esc(x.title)}</strong><div class="subtle">${esc(x.category) || "Personal"} · ${x.current}/${x.target} ${esc(x.unit) || ""}${x.deadline ? " · Due " + date(x.deadline) : ""}</div></div><span class="badge ${x.completed ? "badge-success" : "badge-neutral"}">${x.completed ? "Completed" : p + "%"}</span></div><div class="progress ${x.completed ? "success" : ""}"><span style="width:${p}%"></span></div><div class="actions"><button class="btn btn-small" data-plus="${x.id}" ${x.completed ? "disabled" : ""}>+1</button><button class="btn btn-small" data-complete="${x.id}" ${x.completed ? "disabled" : ""}>Complete</button><button class="btn btn-small" data-edit="${x.id}">Edit</button><button class="btn btn-small btn-danger" data-delete="${x.id}">Delete</button></div></div>`;
+          return `<div class="list-row"><div class="kpi-line"><div><strong>${esc(x.title)}</strong><div class="subtle">${esc(x.category) || "Personal"} · ${x.current}/${x.target} ${esc(x.unit) || ""}${x.deadline ? " · Due " + date(x.deadline) : ""}</div></div><span class="badge ${
+  x.completed
+    ? "badge-success"
+    : days(x.deadline) !== null && days(x.deadline) < 0
+      ? "badge-danger"
+      : "badge-neutral"
+}">
+  ${
+    x.completed
+      ? "Completed"
+      : days(x.deadline) !== null && days(x.deadline) < 0
+        ? "Overdue"
+        : p + "%"
+  }
+</span></div><div class="progress ${x.completed ? "success" : ""}"><span style="width:${p}%"></span></div><div class="actions">
+  ${
+    x.completed
+      ? ""
+      : `
+        <button class="btn btn-small" data-plus="${x.id}">
+          +1
+        </button>
+
+        <button class="btn btn-small" data-complete="${x.id}">
+          Complete
+        </button>
+
+        <button class="btn btn-small" data-edit="${x.id}">
+          Edit
+        </button>
+      `
+  }
+
+  <button
+    class="btn btn-small btn-danger"
+    data-delete="${x.id}"
+  >
+    Delete
+  </button>
+</div></div>`;
         })
         .join("");
       $$("[data-plus]").forEach(
-  (b) =>
-    (b.onclick = async () => {
-      try {
-        const x = items.find(
-          (v) => String(v.id) === String(b.dataset.plus),
-        );
+        (b) =>
+          (b.onclick = async () => {
+            try {
+              const x = items.find(
+                (v) => String(v.id) === String(b.dataset.plus),
+              );
 
-        if (!x) return;
+              if (!x) return;
 
-        const current = Math.min(
-          Number(x.target),
-          Number(x.current) + 1,
-        );
+              const current = Math.min(Number(x.target), Number(x.current) + 1);
 
-        await api(`/api/goals/${x.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({
-            current: current,
-            completed: current >= Number(x.target),
+              await api(`/api/goals/${x.id}`, {
+                method: "PATCH",
+                body: JSON.stringify({
+                  current: current,
+                  completed: current >= Number(x.target),
+                }),
+              });
+
+              await load();
+
+              toast("Progress updated");
+            } catch (err) {
+              console.error(err);
+              toast(err.message || "Could not update progress.");
+            }
           }),
-        });
-
-        await load();
-
-        toast("Progress updated");
-      } catch (err) {
-        console.error(err);
-        toast(err.message || "Could not update progress.");
-      }
-    }),
-);
+      );
       $$("[data-complete]").forEach(
   (b) =>
     (b.onclick = async () => {

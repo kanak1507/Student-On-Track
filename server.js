@@ -247,6 +247,39 @@ app.patch("/api/goals/:id", auth, async (req, res) => {
     });
   }
 });
+app.patch("/api/assignments/:id", auth, async (req, res) => {
+  if (!validId(req.params.id)) {
+    return res.status(400).json({ error: "Invalid assignment." });
+  }
+
+  try {
+    const completed = Boolean(req.body.completed);
+
+    const result = await pool.query(
+      `UPDATE assignments
+       SET completed = $1,
+           updated_at = NOW()
+       WHERE id = $2
+         AND user_id = $3
+       RETURNING *`,
+      [completed, req.params.id, req.user.id]
+    );
+
+    if (!result.rowCount) {
+      return res.status(404).json({
+        error: "Assignment not found."
+      });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Assignment update error:", err);
+
+    res.status(500).json({
+      error: "Unable to update assignment."
+    });
+  }
+});
 
 app.delete("/api/assignments/:id", auth, async (req, res) => {
   if (!validId(req.params.id)) return res.status(400).json({ error: "Invalid assignment." });
